@@ -1,5 +1,5 @@
 
-# 🍌 Serverless pix2pix
+# Instruct Pix2Pix
 
 Ready to deploy inference endpoint for pix2pix. 
 
@@ -24,12 +24,20 @@ docker build -t pix2pix .
 docker run -p 8000:8000 --gpus=all pix2pix
 ```
 
-Then test it
+Then test it: 
+
+Install dev dependies
+
+```
+pip install python-dotenv banana_dev
+```
+
+Write a test_name in test.py
 ```
 python3 test.py
 ```
 
-
+Output will be under data/output/<test_name>
 
 For debugging
 add `debug=True, auto_reload=True` in server.run() in /server.py
@@ -78,9 +86,45 @@ A list of image objects where each has the following properties:
 
 
 
-# Example
+## Example
 
 - Checkout the test.py for an example
+
+
+## Test the deployed service on Banana (with moderation) (python-version)
+You need api & model keys in your .env
+```
+API_KEY=<banana-api-key>
+MODEL_KEY=<banana-model-key>
+```
+
+Write a test_name in test_banana.py
+```
+python3 test_banana.py
+```
+
+Output will be under data/output/<test_name>
+
+
+## Test the deployed service on Banana (with moderation) (python-version)
+You need api & model keys in your .env
+```
+API_KEY=<banana-api-key>
+MODEL_KEY=<banana-model-key>
+```
+
+```
+python3 test_banana.py
+```
+
+## Test the deployed service on Banana (with moderation) (python-version)
+
+```
+const banana = require("@banana-dev/banana-dev")
+results = await banana.run(apiKey, modelKey, modelInputs)
+
+```
+
 
 
 
@@ -104,8 +148,4 @@ Learn more about Instruct Pix2Pix here - https://www.timothybrooks.com/instruct-
 
 And Hugging Face support there - https://huggingface.co/timbrooks/instruct-pix2pix
 
-Understand the 🍌 [Serverless framework](https://docs.banana.dev/banana-docs/core-concepts/inference-server/serverless-framework) and functionality of each file within it.
-
 <br>
-
-## Use Banana for scale.
