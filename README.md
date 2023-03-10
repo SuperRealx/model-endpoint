@@ -111,7 +111,7 @@ python3 test_banana.py
 Output will be under data/output/<test_name>
 
 
-## Test the deployed service on Banana (with moderation) (javascript-version)
+## Test the deployed service on Banana (broken right now) (javascript-version)
 You need api & model keys in your .env
 ```
 API_KEY=<banana-api-key>
@@ -122,7 +122,7 @@ MODEL_KEY=<banana-model-key>
 python3 test_banana.py
 ```
 
-## Test the deployed service on Banana (with moderation) (python-version)
+## Test the deployed service on Banana (broken right now) (python-version)
 
 ```
 const banana = require("@banana-dev/banana-dev")
