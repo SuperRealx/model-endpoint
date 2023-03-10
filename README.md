@@ -8,7 +8,28 @@ Ready to deploy inference endpoint for pix2pix.
 This repo uses the HuggingFace diffusers' implementation of Tim Brooks et al. Instruct Pix2pix model - https://www.timothybrooks.com/instruct-pix2pix
 
 
-# How to interact with the service
+# How to run the service
+2 options:
+
+Without docker
+```
+pip install -r requirements.txt
+python3 server.py
+```
+
+Or with docker
+
+```
+docker build -t pix2pix .
+docker run -p 8000:8000 pix2pix
+```
+
+For debugging
+add `debug=True, auto_reload=True` in server.run() in /server.py
+
+
+
+# How to interact with the server
 
 ## Model Inputs
 
