@@ -21,11 +21,20 @@ Or with docker
 
 ```
 docker build -t pix2pix .
-docker run -p 8000:8000 pix2pix
+docker run -p 8000:8000 --gpus=all pix2pix
 ```
+
+Then test it
+```
+python3 test.py
+```
+
+
 
 For debugging
 add `debug=True, auto_reload=True` in server.run() in /server.py
+
+Note: Sanic optimisations fail at the moment so always keep debug=True
 
 
 

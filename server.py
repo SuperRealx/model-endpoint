@@ -50,4 +50,5 @@ def inference(request):
 
 
 if __name__ == '__main__':
-    server.run(host='0.0.0.0', port=8000, workers=1) # , debug=True, auto_reload=True
+    print(f"Running python: {sys.version_info[:] = }")
+    server.run(host='0.0.0.0', port=8000, workers=1,  debug=True) # auto_reload=True

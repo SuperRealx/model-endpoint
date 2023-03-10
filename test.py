@@ -53,18 +53,23 @@ def test_inference():
 
     # save responnse
     output = response.json()
-    for idx, image in enumerate(output): 
-        print("Saving images")
 
-        txt_cfg = image["text_cfg_scale"]
-        img_cfg = image["image_cfg_scale"]
-        steps = image["steps"]
+    try:
+        for idx, image in enumerate(output): 
+            print("Saving images")
 
-        img_path = f"data/output/{test_name}-{txt_cfg}-{img_cfg}-{steps}-{idx}.jpeg"
-        print("Saving: ", img_path)
+            txt_cfg = image["text_cfg_scale"]
+            img_cfg = image["image_cfg_scale"]
+            steps = image["steps"]
 
-        img = stringToPil(image['image'])
-        img.save(img_path)
+            img_path = f"data/output/{test_name}-{txt_cfg}-{img_cfg}-{steps}-{idx}.jpeg"
+            print("Saving: ", img_path)
+
+            img = stringToPil(image['image'])
+            img.save(img_path)
+    except Exception as e:
+        print(output)
+        print(e)
 
 
 if __name__ == "__main__":
@@ -72,7 +77,7 @@ if __name__ == "__main__":
     res = check_server_status()
     server_health = res.json()
 
-    if server_health["state"] == 'healthy':
+    if (server_health["state"] == 'healthy') and (server_health["gpu"]):
         try:
             print("Testing inference")
             test_inference()
@@ -81,4 +86,5 @@ if __name__ == "__main__":
             print(e)
 
     else: 
+        print("Server not healthy or no gpu access")
         print(server_health)
