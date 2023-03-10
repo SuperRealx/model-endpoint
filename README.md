@@ -9,6 +9,11 @@ This repo uses the HuggingFace diffusers' implementation of Tim Brooks et al. In
 
 
 # How to run the service
+Mandatory: Get a machine with gpu. 
+If you don't you can use: https://brev.dev/
+
+Then:
+
 2 options:
 
 Without docker
@@ -106,7 +111,7 @@ python3 test_banana.py
 Output will be under data/output/<test_name>
 
 
-## Test the deployed service on Banana (with moderation) (python-version)
+## Test the deployed service on Banana (with moderation) (javascript-version)
 You need api & model keys in your .env
 ```
 API_KEY=<banana-api-key>
