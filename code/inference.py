@@ -2,34 +2,38 @@ import math
 import json
 import random
 import logging
+import time
 from PIL import Image, ImageOps
-
+from io import BytesIO
+import base64
 import torch
 from diffusers import StableDiffusionInstructPix2PixPipeline,EulerAncestralDiscreteScheduler
-
 
 # This code will be loaded on each worker separately..
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def model_fn(model_dir):
+def model_fn(model_dir: str)->StableDiffusionInstructPix2PixPipeline:
+    logger.info(">>> Loading model")
+    start = time.time()
     device = _get_device()
-    logger.info(">>> Device is '%s'.." % device)
+    logger.info("Device is '%s'.." % device)
     model_id = "timbrooks/instruct-pix2pix"
     model = StableDiffusionInstructPix2PixPipeline.from_pretrained(
         model_id, torch_dtype=torch.float16, safety_checker=None)
     model.to(device)
-    print(type(model))
+    logger.info(type(model))
     model.scheduler = EulerAncestralDiscreteScheduler.from_config(model.scheduler.config)
-    logger.info(">>> Model loaded!..")
+    end = time.time()
+    logger.info(f">>> Model loaded!.. took {end-start} secs")
     return model
 
 
 # Inference is ran for every server call
 # Reference preloaded global pipeline here. 
 def transform_fn(
-    model, 
+    model: StableDiffusionInstructPix2PixPipeline, 
     request_body, 
     content_type, 
     accept
@@ -41,9 +45,10 @@ def transform_fn(
     Returns:
         list of generated images objects
     """
-    model_inputs = request_body["model_inputs"]
+    model_inputs = json.loads(request_body)["model_inputs"]
     # Parse pipeline arguments
     # Official model inputs
+    
     prompt = model_inputs.get('prompt', None)
     steps = model_inputs.get('steps', 20)
     image_cfg_scale=model_inputs.get('image_cfg_scale', 1.5)
@@ -53,12 +58,15 @@ def transform_fn(
     randomize_seed=model_inputs.get('randomize_seed', True)
     num_images_per_prompt=model_inputs.get('num_images', 1)
         
+
     # Custom
     just_test_img=model_inputs.get('test_mode', False)
     toDataUrl=model_inputs.get('toDataUrl', False)
 
     # decode image
     base64_string = model_inputs.get('image')
+    logger.info(f"Reveived request with image: {base64_string[:20]}")
+
     image = _stringToPil(base64_string)
 
     if prompt == None:
@@ -76,37 +84,34 @@ def transform_fn(
             })
 
     else:
+        logger.info(f">>> Preprocessing start")
+        start = time.time()
         # preprocessing step
         preprocessed_img = _preprocess(image)
+        end = time.time()
+        logger.info(f">>> Preprocessing took {end-start} secs")
 
-        # generate different samples
-        sample_variants = [
-            (image_cfg_scale, text_cfg_scale),
-            (round(image_cfg_scale-.15, 3), text_cfg_scale),
-            (round(image_cfg_scale-.3, 3), text_cfg_scale),
-            (round(image_cfg_scale+.15, 3), text_cfg_scale),
-            (image_cfg_scale, text_cfg_scale+2)
-
-        ]
         
-        for i, (img_cfg, text_cfg) in enumerate(sample_variants):
-            logger.info("Running for sample: %s", i)
-            i+=1
-            # Run the model
-            results.append(
-                _generate(
-                    model,
-                    prompt=prompt,
-                    input_image=preprocessed_img,
-                    steps=steps,
-                    randomize_seed=randomize_seed,
-                    seed=seed,
-                    randomize_cfg=randomize_cfg,
-                    text_cfg_scale=text_cfg,
-                    image_cfg_scale=img_cfg,
-                    num_images_per_prompt=num_images_per_prompt
-                    )
-                )
+    # Run the model
+    start = time.time()
+    logger.info(f">>> Generating start")
+    generated_img = _generate(
+            model,
+            prompt=prompt,
+            input_image=preprocessed_img,
+            steps=steps,
+            randomize_seed=randomize_seed,
+            seed=seed,
+            randomize_cfg=randomize_cfg,
+            text_cfg_scale=text_cfg_scale,
+            image_cfg_scale=image_cfg_scale,
+            num_images_per_prompt=num_images_per_prompt
+            )
+    
+    results.append(generated_img)
+    end = time.time()
+    logger.info(f">>> Generating tool {end-start} secs")
+
     return json.dumps(results)
 
 
@@ -135,7 +140,7 @@ def _preprocess(
     
     
 def _generate(
-    model,
+    model: StableDiffusionInstructPix2PixPipeline,
     prompt: str,
     input_image: Image.Image,
     steps: int,
@@ -169,7 +174,7 @@ def _generate(
     generator = torch.manual_seed(seed)
 
     # debugging
-    print("Running model with params: ", 
+    logger.info("Running model with params: ", 
         {'prompt': prompt, 
         'steps': steps, 
         'image_cfg_scale': image_cfg_scale, 
