@@ -154,3 +154,9 @@ Learn more about Instruct Pix2Pix here - https://www.timothybrooks.com/instruct-
 And Hugging Face support there - https://huggingface.co/timbrooks/instruct-pix2pix
 
 <br>
+
+
+Containers: 
+
+
+763104351884.dkr.ecr.us-east-1.amazonaws.com/huggingface-pytorch-training:1.10.2-transformers4.17.0-gpu-py38-cu113-ubuntu20.04
